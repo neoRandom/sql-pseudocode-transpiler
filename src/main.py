@@ -1,4 +1,4 @@
-from pseudocode import transpile
+import pseudocode_parser
 
 
 def run():
@@ -6,7 +6,7 @@ def run():
 
     try:
         print("Parsing the pseudo-code as JSON...")
-        transpile(file_path)
+        pseudocode_parser.transpile(file_path)
     except FileNotFoundError as e:
         print(f"Error: file ´{e.filename}´ not found")
         return
