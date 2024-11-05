@@ -9,7 +9,7 @@ def obj_to_str(
                     str,  # Name
                     list[  # Attribute List
                         dict[  # Attribute Object
-                            str,  # ame
+                            str,  # Name
                             str,  # Type
                             str,  # Size
                             list[str]  # Modifiers
@@ -50,7 +50,7 @@ def transpile(file_path: str) -> bool:
                 str,  # Name
                 list[  # Attribute List
                     dict[  # Attribute Object
-                        str,  # ame
+                        str,  # Name
                         str,  # Type
                         str,  # Size
                         list[str]  # Modifiers
