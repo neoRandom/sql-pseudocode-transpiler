@@ -1,0 +1,428 @@
+[
+    {
+        "name": "Animal",
+        "size": 10,
+        "body": [
+            {
+                "name": "cod_animal",
+                "type": "unsigned int",
+                "size": "",
+                "modifiers": [
+                    "pk"
+                ]
+            },
+            {
+                "name": "cod_container",
+                "type": "unsigned int",
+                "size": "",
+                "modifiers": [
+                    "fk"
+                ]
+            },
+            {
+                "name": "cod_veterinario",
+                "type": "unsigned int",
+                "size": "",
+                "modifiers": [
+                    "fk"
+                ]
+            },
+            {
+                "name": "id_classe",
+                "type": "unsigned int",
+                "size": "",
+                "modifiers": [
+                    "fk"
+                ]
+            },
+            {
+                "name": "id_especie",
+                "type": "unsigned int",
+                "size": "",
+                "modifiers": [
+                    "fk"
+                ]
+            },
+            {
+                "name": "nome",
+                "type": "varchar",
+                "size": "64",
+                "modifiers": [
+                    "not null"
+                ]
+            },
+            {
+                "name": "cor",
+                "type": "varchar",
+                "size": "32",
+                "modifiers": [
+                    "not null"
+                ]
+            },
+            {
+                "name": "altura",
+                "type": "decimal",
+                "size": "20, 5",
+                "modifiers": [
+                    "not null"
+                ]
+            },
+            {
+                "name": "peso",
+                "type": "decimal",
+                "size": "20, 5",
+                "modifiers": [
+                    "not null"
+                ]
+            },
+            {
+                "name": "genero",
+                "type": "varchar",
+                "size": "16",
+                "modifiers": [
+                    "not null"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "ClasseAnimal",
+        "size": 2,
+        "body": [
+            {
+                "name": "id_classe",
+                "type": "unsigned int",
+                "size": "",
+                "modifiers": [
+                    "pk"
+                ]
+            },
+            {
+                "name": "descricao",
+                "type": "varchar",
+                "size": "64",
+                "modifiers": [
+                    "not null"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "EspecieAnimal",
+        "size": 2,
+        "body": [
+            {
+                "name": "id_especie",
+                "type": "unsigned int",
+                "size": "",
+                "modifiers": [
+                    "pk"
+                ]
+            },
+            {
+                "name": "descricao",
+                "type": "varchar",
+                "size": "64",
+                "modifiers": [
+                    "not null"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Container",
+        "size": 6,
+        "body": [
+            {
+                "name": "cod_container",
+                "type": "unsigned int",
+                "size": "",
+                "modifiers": [
+                    "pk"
+                ]
+            },
+            {
+                "name": "id_tipo_container",
+                "type": "unsigned int",
+                "size": "",
+                "modifiers": [
+                    "fk"
+                ]
+            },
+            {
+                "name": "id_local",
+                "type": "unsigned int",
+                "size": "",
+                "modifiers": [
+                    "fk"
+                ]
+            },
+            {
+                "name": "descricao",
+                "type": "varchar",
+                "size": "64",
+                "modifiers": [
+                    "not null"
+                ]
+            },
+            {
+                "name": "diagonal",
+                "type": "decimal",
+                "size": "20, 5",
+                "modifiers": [
+                    "not null"
+                ]
+            },
+            {
+                "name": "area",
+                "type": "decimal",
+                "size": "20, 5",
+                "modifiers": [
+                    "not null"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "TipoContainer",
+        "size": 3,
+        "body": [
+            {
+                "name": "id_tipo_container",
+                "type": "unsigned int",
+                "size": "",
+                "modifiers": [
+                    "pk"
+                ]
+            },
+            {
+                "name": "id_local",
+                "type": "unsigned int",
+                "size": "",
+                "modifiers": [
+                    "fk"
+                ]
+            },
+            {
+                "name": "descricao",
+                "type": "varchar",
+                "size": "64",
+                "modifiers": [
+                    "not null"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Local",
+        "size": 3,
+        "body": [
+            {
+                "name": "id_local",
+                "type": "unsigned int",
+                "size": "",
+                "modifiers": [
+                    "pk"
+                ]
+            },
+            {
+                "name": "endereco",
+                "type": "varchar",
+                "size": "128",
+                "modifiers": [
+                    "not null"
+                ]
+            },
+            {
+                "name": "descricao",
+                "type": "varchar",
+                "size": "64",
+                "modifiers": [
+                    "not null"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Veterinario",
+        "size": 2,
+        "body": [
+            {
+                "name": "cod_veterinario",
+                "type": "unsigned int",
+                "size": "",
+                "modifiers": [
+                    "pk"
+                ]
+            },
+            {
+                "name": "cod_funcionario",
+                "type": "unsigned int",
+                "size": "",
+                "modifiers": [
+                    "fk"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Agendamento",
+        "size": 3,
+        "body": [
+            {
+                "name": "cod_agendamento",
+                "type": "unsigned int",
+                "size": "",
+                "modifiers": [
+                    "pk"
+                ]
+            },
+            {
+                "name": "cod_animal",
+                "type": "unsigned int",
+                "size": "",
+                "modifiers": [
+                    "fk"
+                ]
+            },
+            {
+                "name": "datahora",
+                "type": "datetime",
+                "size": "",
+                "modifiers": [
+                    "not null"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Funcionario",
+        "size": 8,
+        "body": [
+            {
+                "name": "cod_funcionario",
+                "type": "unsigned int",
+                "size": "",
+                "modifiers": [
+                    "pk"
+                ]
+            },
+            {
+                "name": "id_cargo",
+                "type": "unsigned int",
+                "size": "",
+                "modifiers": [
+                    "fk"
+                ]
+            },
+            {
+                "name": "nome",
+                "type": "varchar",
+                "size": "128",
+                "modifiers": [
+                    "not null"
+                ]
+            },
+            {
+                "name": "data_nasc",
+                "type": "date",
+                "size": "",
+                "modifiers": [
+                    "not null"
+                ]
+            },
+            {
+                "name": "cpf",
+                "type": "varchar",
+                "size": "14",
+                "modifiers": [
+                    "not null"
+                ]
+            },
+            {
+                "name": "rg",
+                "type": "varchar",
+                "size": "12",
+                "modifiers": [
+                    "not null"
+                ]
+            },
+            {
+                "name": "endereco",
+                "type": "varchar",
+                "size": "128",
+                "modifiers": [
+                    "not null"
+                ]
+            },
+            {
+                "name": "salario_bonus",
+                "type": "decimal",
+                "size": "20, 5",
+                "modifiers": [
+                    "not null"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Cargo",
+        "size": 3,
+        "body": [
+            {
+                "name": "id_cargo",
+                "type": "unsigned int",
+                "size": "",
+                "modifiers": [
+                    "pk"
+                ]
+            },
+            {
+                "name": "descricao",
+                "type": "varchar",
+                "size": "500",
+                "modifiers": [
+                    "not null"
+                ]
+            },
+            {
+                "name": "salario_base",
+                "type": "decimal",
+                "size": "20, 5",
+                "modifiers": [
+                    "not null"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "LimpezaContainer",
+        "size": 3,
+        "body": [
+            {
+                "name": "cod_limpeza",
+                "type": "unsigned int",
+                "size": "",
+                "modifiers": [
+                    "pk"
+                ]
+            },
+            {
+                "name": "cod_container",
+                "type": "unsigned int",
+                "size": "",
+                "modifiers": [
+                    "fk"
+                ]
+            },
+            {
+                "name": "datahora",
+                "type": "datetime",
+                "size": "",
+                "modifiers": [
+                    "not null"
+                ]
+            }
+        ]
+    }
+]
