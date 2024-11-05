@@ -54,7 +54,7 @@ def transpile(file_path: str) -> str:
         ] = dict()
 
         # Setting basic informations
-        table["name"] = pseudocode_lines[index][0:-1]
+        table["name"] = pseudocode_lines[index][0:-1].lower()
         table["size"] = size
         table["body"] = list()
 
