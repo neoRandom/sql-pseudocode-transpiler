@@ -1,7 +1,7 @@
 import json
 
 
-def transpile(file_path: str) -> bool:
+def transpile(file_path: str) -> str:
     """
     Throws:
     - OSError
@@ -112,3 +112,5 @@ def transpile(file_path: str) -> bool:
             indent=4
         )
     )
+
+    return output_path
