@@ -12,10 +12,10 @@ if __name__ == "__main__":
             print("Parsing the pseudocode as JSON...")
             output_path = pseudocode_parser.transpile(file_path)
         except FileNotFoundError as e:
-            print(f"Error: pseudocode file ´{e.filename}´ not found.")
+            print(f"Error: Pseudocode file ´{e.filename}´ not found.\n{e}")
             return
         except Exception as e:
-            print(f"Error: generic error.\n{e}")
+            print(f"Error: Generic error.\n{e}")
             return
         else:
             print("Pseudocode parsed successfully.")
@@ -24,8 +24,11 @@ if __name__ == "__main__":
         try:
             print("Parsing the JSON as SQL...")
             json_parser.transpile(output_path)
+        except FileNotFoundError as e:
+            print(f"Error: JSON file ´{e.filename}´ not found.\n{e}")
+            return
         except Exception as e:
-            print(f"Error: generic error.\n{e}")
+            print(f"Error: Generic error.\n{e}")
             return
         else:
             print("JSON parsed successfully.")
