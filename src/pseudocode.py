@@ -1,6 +1,12 @@
 import json
 
-def transpile(file_path: str):
+
+def transpile(file_path: str) -> bool:
+    """
+    Throws:
+    - OSError
+    - FileNotFoundError
+    """
     pseudocode_lines: list[str] = list()
     tables_metadata: list[int, int] = list()
     table_list: list[
@@ -19,11 +25,11 @@ def transpile(file_path: str):
     ] = list()
 
     # Reading the pseudocode file
-    with open(file_path, "r", encoding="UTF-8") as pseudocode_file:
-        pseudocode_lines = [
-            line for line in pseudocode_file.readlines()
-            if line.strip() != ""
-        ]
+    pseudocode_file = open(file_path, "r", encoding="UTF-8")
+    pseudocode_lines = [
+        line for line in pseudocode_file.readlines()
+        if line.strip() != ""
+    ]
 
     # Getting the code metadata (tables index position and size)
     for i, line in enumerate(pseudocode_lines):
@@ -99,10 +105,10 @@ def transpile(file_path: str):
     dot_pos = file_path.rindex(".")
     output_path = file_path[0:dot_pos] + ".json"
 
-    with open(output_path, "w", encoding="UTF-8") as output:
-        output.write(
-            json.dumps(
-                table_list, 
-                indent=4
-            )
+    output_file = open(output_path, "w", encoding="UTF-8")
+    output_file.write(
+        json.dumps(
+            table_list, 
+            indent=4
         )
+    )
