@@ -1,4 +1,5 @@
 import json
+from models import Attribute, JSONSchema
 
 
 def transpile(file_path: str) -> str:
@@ -8,21 +9,8 @@ def transpile(file_path: str) -> str:
     - FileNotFoundError
     """
     pseudocode_lines: list[str] = list()
-    tables_metadata: list[int, int] = list()
-    table_list: list[
-        dict[
-            str, 
-            int, 
-            list[
-                dict[
-                    str, 
-                    str, 
-                    str, 
-                    list[str]
-                ]
-            ]
-        ]
-    ] = list()
+    tables_metadata: list[list[int]] = list()
+    table_list: list[JSONSchema] = list()
 
     # Reading the pseudocode file
     pseudocode_file = open(file_path, "r", encoding="UTF-8")
@@ -40,28 +28,17 @@ def transpile(file_path: str) -> str:
 
     # Getting each table
     for index, size in tables_metadata:
-        table: dict[
-            str, 
-            int, 
-            list[
-                dict[
-                    str, 
-                    str, 
-                    str, 
-                    list[str]
-                ]
-            ]
-        ] = dict()
+        table: JSONSchema = JSONSchema.model_construct()
 
         # Setting basic informations
-        table["name"] = pseudocode_lines[index][0:-1].lower()
-        table["size"] = size
-        table["body"] = list()
+        table.name = pseudocode_lines[index][0:-1].lower()
+        table.size = size
+        table.body = list()
 
         # Getting the attributes
         for i in range(index, index + size):
             line = pseudocode_lines[i + 1][2:-1]
-            attribute: dict[str, str, str, list[str]] = dict()
+            attribute: Attribute = Attribute.model_construct()
 
             # TODO: Improve the line splitting system, its too bad and leads to errors.
             # Some explanations on how this currently works:
@@ -74,11 +51,11 @@ def transpile(file_path: str) -> str:
 
             if attr_type == "pk" or attr_type.startswith("fk"):
                 # Setting the values on the object
-                attribute["name"] = attr_name
-                attribute["type"] = "unsigned int"  # The default value (for me) of a PK or FK is `unsigned int`
-                attribute["size"] = ""
-                attribute["modifiers"] = [m.lower() for m in modifiers] or []
-                attribute["modifiers"].append(attr_type)
+                attribute.name = attr_name
+                attribute.type = "unsigned int"  # The default value (for me) of a PK or FK is `unsigned int`
+                attribute.size = ""
+                attribute.modifiers = [m.lower() for m in modifiers] or []
+                attribute.modifiers.append(attr_type)
             else:
                 # Getting the attribute size if it has one, the value will just be an empty string if not
                 if "(" in attr_type:
@@ -91,12 +68,12 @@ def transpile(file_path: str) -> str:
                     modifiers.append("not null")
 
                 # Setting the values on the object
-                attribute["name"] = attr_name
-                attribute["type"] = attr_type
-                attribute["size"] = attr_size.replace(",", ", ")
-                attribute["modifiers"] = [m.lower() for m in modifiers] or []
+                attribute.name = attr_name
+                attribute.type = attr_type
+                attribute.size = attr_size.replace(",", ", ")
+                attribute.modifiers = [m.lower() for m in modifiers] or []
             
-            table["body"].append(attribute)
+            table.body.append(attribute)
         
         #
         table_list.append(table)
@@ -108,7 +85,7 @@ def transpile(file_path: str) -> str:
     output_file = open(output_path, "w", encoding="UTF-8")
     output_file.write(
         json.dumps(
-            table_list, 
+            [table.model_dump() for table in table_list], 
             indent=4
         )
     )

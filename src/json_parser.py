@@ -2,6 +2,7 @@ import json
 from typing import List, Any, Iterable
 from models import Table, DatabaseSchema, JSONSchema
 
+
 def insert_command(
         *sql: Iterable[Any], 
         pad: int = 0, 
@@ -74,8 +75,6 @@ def insert_table(table: Table) -> str:
         table_sql += insert_command(*constrains_sql, pad=4, sep=",", end="\n);")
     else:
         table_sql += insert_command(*attributes_sql, pad=4, sep=",", end="\n);")
-
-    print(table_sql)
 
     return table_sql
 
