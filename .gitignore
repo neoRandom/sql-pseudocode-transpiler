@@ -1,6 +1,14 @@
+# Python cache stuff
 __pycache__/
+
+# I really don't like this folder
 .vscode/
+
+# Virtual Environment common names
 env/
 .env/
 venv/
 .venv/
+
+# What is in here shouldn't be shared with the world
+build/*

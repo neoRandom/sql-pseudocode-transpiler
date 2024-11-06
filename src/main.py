@@ -1,5 +1,6 @@
 import pseudocode_parser
 import json_parser
+from sys import argv
 
 
 if __name__ == "__main__":
@@ -16,8 +17,13 @@ if __name__ == "__main__":
         add a FK to a table that has not been created, it will throw an error.
         """
 
-        file_path = "build/code.txt"
+        file_path: str
         output_path: str
+
+        # Getting the file path
+        if len(argv) < 2:
+            raise ValueError("Missing required argument: 'file path'")
+        file_path = argv[1]
 
         # Pseudocode parsing step
         try:
