@@ -72,7 +72,7 @@ def transpile(file_path: str) -> str:
             attr_name = attr_name.lower().replace(":", "")
             attr_type = attr_type.lower().replace("-", " ")  
 
-            if attr_type in ("pk", "fk"):
+            if attr_type == "pk" or attr_type.startswith("fk"):
                 # Setting the values on the object
                 attribute["name"] = attr_name
                 attribute["type"] = "unsigned int"  # The default value (for me) of a PK or FK is `unsigned int`

@@ -1,6 +1,6 @@
 [
     {
-        "name": "Animal",
+        "name": "animal",
         "size": 10,
         "body": [
             {
@@ -16,7 +16,7 @@
                 "type": "unsigned int",
                 "size": "",
                 "modifiers": [
-                    "fk"
+                    "fk(container)"
                 ]
             },
             {
@@ -24,7 +24,7 @@
                 "type": "unsigned int",
                 "size": "",
                 "modifiers": [
-                    "fk"
+                    "fk(veterinario)"
                 ]
             },
             {
@@ -32,7 +32,7 @@
                 "type": "unsigned int",
                 "size": "",
                 "modifiers": [
-                    "fk"
+                    "fk(classe_animal)"
                 ]
             },
             {
@@ -40,7 +40,7 @@
                 "type": "unsigned int",
                 "size": "",
                 "modifiers": [
-                    "fk"
+                    "fk(especie_animal)"
                 ]
             },
             {
@@ -86,7 +86,7 @@
         ]
     },
     {
-        "name": "ClasseAnimal",
+        "name": "classe_animal",
         "size": 2,
         "body": [
             {
@@ -108,7 +108,7 @@
         ]
     },
     {
-        "name": "EspecieAnimal",
+        "name": "especie_animal",
         "size": 2,
         "body": [
             {
@@ -130,7 +130,7 @@
         ]
     },
     {
-        "name": "Container",
+        "name": "container",
         "size": 6,
         "body": [
             {
@@ -146,15 +146,15 @@
                 "type": "unsigned int",
                 "size": "",
                 "modifiers": [
-                    "fk"
+                    "fk(tipo_container)"
                 ]
             },
             {
-                "name": "id_local",
+                "name": "id_ala",
                 "type": "unsigned int",
                 "size": "",
                 "modifiers": [
-                    "fk"
+                    "fk(ala)"
                 ]
             },
             {
@@ -184,8 +184,8 @@
         ]
     },
     {
-        "name": "TipoContainer",
-        "size": 3,
+        "name": "tipo_container",
+        "size": 2,
         "body": [
             {
                 "name": "id_tipo_container",
@@ -193,14 +193,6 @@
                 "size": "",
                 "modifiers": [
                     "pk"
-                ]
-            },
-            {
-                "name": "id_local",
-                "type": "unsigned int",
-                "size": "",
-                "modifiers": [
-                    "fk"
                 ]
             },
             {
@@ -214,11 +206,11 @@
         ]
     },
     {
-        "name": "Local",
+        "name": "ala",
         "size": 3,
         "body": [
             {
-                "name": "id_local",
+                "name": "id_ala",
                 "type": "unsigned int",
                 "size": "",
                 "modifiers": [
@@ -244,7 +236,7 @@
         ]
     },
     {
-        "name": "Veterinario",
+        "name": "veterinario",
         "size": 2,
         "body": [
             {
@@ -260,17 +252,17 @@
                 "type": "unsigned int",
                 "size": "",
                 "modifiers": [
-                    "fk"
+                    "fk(funcionario)"
                 ]
             }
         ]
     },
     {
-        "name": "Agendamento",
-        "size": 3,
+        "name": "consulta",
+        "size": 4,
         "body": [
             {
-                "name": "cod_agendamento",
+                "name": "cod_consulta",
                 "type": "unsigned int",
                 "size": "",
                 "modifiers": [
@@ -282,7 +274,7 @@
                 "type": "unsigned int",
                 "size": "",
                 "modifiers": [
-                    "fk"
+                    "fk(animal)"
                 ]
             },
             {
@@ -292,11 +284,19 @@
                 "modifiers": [
                     "not null"
                 ]
+            },
+            {
+                "name": "descricao",
+                "type": "varchar",
+                "size": "64",
+                "modifiers": [
+                    "not null"
+                ]
             }
         ]
     },
     {
-        "name": "Funcionario",
+        "name": "funcionario",
         "size": 8,
         "body": [
             {
@@ -312,7 +312,7 @@
                 "type": "unsigned int",
                 "size": "",
                 "modifiers": [
-                    "fk"
+                    "fk(cargo)"
                 ]
             },
             {
@@ -366,7 +366,7 @@
         ]
     },
     {
-        "name": "Cargo",
+        "name": "cargo",
         "size": 3,
         "body": [
             {
@@ -396,8 +396,8 @@
         ]
     },
     {
-        "name": "LimpezaContainer",
-        "size": 3,
+        "name": "limpeza_ontainer",
+        "size": 5,
         "body": [
             {
                 "name": "cod_limpeza",
@@ -412,13 +412,29 @@
                 "type": "unsigned int",
                 "size": "",
                 "modifiers": [
-                    "fk"
+                    "fk(container)"
+                ]
+            },
+            {
+                "name": "cod_funcionario",
+                "type": "unsigned int",
+                "size": "",
+                "modifiers": [
+                    "fk(funcionario)"
                 ]
             },
             {
                 "name": "datahora",
                 "type": "datetime",
                 "size": "",
+                "modifiers": [
+                    "not null"
+                ]
+            },
+            {
+                "name": "descricao",
+                "type": "varchar",
+                "size": "64",
                 "modifiers": [
                     "not null"
                 ]

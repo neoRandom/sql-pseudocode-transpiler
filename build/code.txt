@@ -1,56 +1,68 @@
-Animal
+animal
 - cod_animal PK
-- cod_container FK
-- cod_veterinario FK
-- id_classe FK
-- id_especie FK
+- cod_container FK(container)
+- cod_veterinario FK(veterinario)
+- id_classe FK(classe_animal)
+- id_especie FK(especie_animal)
 - nome: varchar(64)
 - cor: varchar(32)
 - altura: decimal(20, 5)
 - peso: decimal(20,5)
 - genero: varchar(16)
-ClasseAnimal
+
+classe_animal
 - id_classe PK
 - descricao: varchar(64)
-EspecieAnimal
+
+especie_animal
 - id_especie PK
 - descricao: varchar(64)
-Container
+
+container
 - cod_container PK
-- id_tipo_container FK
-- id_local FK
+- id_tipo_container FK(tipo_container)
+- id_ala FK(ala)
 - descricao: varchar(64)
 - diagonal: decimal(20,5)
 - area: decimal(20,5)
-TipoContainer
+
+tipo_container
 - id_tipo_container PK
-- id_local FK
 - descricao: varchar(64)
-Local
-- id_local PK
+
+ala
+- id_ala PK
 - endereco: varchar(128)
 - descricao: varchar(64)
-Veterinario
+
+veterinario
 - cod_veterinario PK
-- cod_funcionario FK
-Agendamento
-- cod_agendamento PK
-- cod_animal FK
+- cod_funcionario FK(funcionario)
+
+consulta
+- cod_consulta PK
+- cod_animal FK(animal)
 - datahora: datetime
-Funcionario
+- descricao: varchar(64)
+
+funcionario
 - cod_funcionario PK
-- id_cargo FK
+- id_cargo FK(cargo)
 - nome: varchar(128)
 - data_nasc: date
 - cpf: varchar(14)
 - rg: varchar(12)
 - endereco: varchar(128)
 - salario_bonus: decimal(20,5)
-Cargo
+
+cargo
 - id_cargo PK
 - descricao: varchar(500)
 - salario_base: decimal(20,5)
-LimpezaContainer
+
+limpeza_ontainer
 - cod_limpeza PK
-- cod_container FK
+- cod_container FK(container)
+- cod_funcionario FK(funcionario)
 - datahora: datetime
+- descricao: varchar(64)

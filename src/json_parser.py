@@ -1,158 +1,178 @@
 import json
+from pydantic import BaseModel
+from typing import List, Any, Iterable
 
 
-def insert_command(*sql: tuple[str] | list[str] | str, tab: str = 0, end: str = ";\n") -> str:
-    if type(sql[0]) is str:
-        return (" " * tab) + end.join(sql)
+
+class Attribute(BaseModel):
+    name: str
+    type: str
+    size: str
+    modifiers: List[str]
+
+
+class Table(BaseModel):
+    name: str
+    attribute_list: List[Attribute]
+
+
+class DatabaseSchema(BaseModel):
+    database_name: str
+    table_list: List[Table]
+
+
+class JSONSchema(BaseModel):
+    name: str
+    size: int
+    body: List[Attribute]
+
+
+
+def insert_command(
+        *sql: Iterable[Any], 
+        pad: int = 0, 
+        sep: str = ";",
+        end: str = ";"
+    ) -> str:
+    if len(sql) == 0:
+        raise RuntimeError("Expected non-empty tuple")
+    
+    # The separator and the end str always end with a new line
+    sep += "\n" 
+    end += "\n"
+
+    if isinstance(sql[0], str):
+        return sep.join([(" " * pad) + line for line in sql]) + end # type: ignore
+    
+    return sep.join([(" " * pad) + " ".join(line) for line in sql]) + end
+
+
+def insert_table(table: Table) -> str:
+    table_sql: str = insert_command(
+        ("CREATE TABLE", table.name), 
+        end=" ("
+    )
+
+    attributes_sql: List[Iterable[str]] = list()
+    constrains_sql: List[Iterable[str]] = list()
+    fk_list: List[tuple[str, str]] = list()
+
+    # Getting the SQL for the beginning part of the inner part of the table, a.k.a. the attributes
+    for attribute in table.attribute_list:
+        attr_name = attribute.name
+        attr_type = attribute.type.upper()
+        attr_mods = [m.upper() for m in attribute.modifiers]
+
+        referenced_table: str = ""  # For the FK operation
+
+        for mod in attr_mods:
+            if mod.startswith("FK"):
+                try:
+                    referenced_table = mod.split("(")[1][:-1]
+                except IndexError:
+                    raise RuntimeError("Expected foreign Table name")
+                fk_list.append((attr_name, referenced_table.lower()))
+                attr_mods.remove(mod)
+                break
+            elif mod == "PK":
+                attr_mods.remove("PK")
+                attr_mods.append("IDENTITY")
+                constrains_sql.append(f"PRIMARY KEY ({attr_name})")  # Adding the PRIMARY KEY table constrain
+                break
+        
+        if attribute.size != "":  # If the attribute has a size, append it with parenthesis like a normal SQL
+            attr_type += f"({attribute.size})"
+
+        attributes_sql.append(
+            (attr_name, attr_type, " ".join(attr_mods)) 
+            if attr_mods else 
+            (attr_name, attr_type)
+        )
+
+    
+
+    # Getting the FOREIGN KEY constrains
+    for fk_name, referenced_table in fk_list:
+        constrains_sql.append(f"FOREIGN KEY ({fk_name}) REFERENCES {referenced_table}")
+
+    if constrains_sql:
+        table_sql += insert_command(*attributes_sql, pad=4, sep=",", end=",\n")
+        table_sql += insert_command(*constrains_sql, pad=4, sep=",", end="\n);")
     else:
-        return (" " * tab) + end.join([" ".join(line) for line in sql]) + end
+        table_sql += insert_command(*attributes_sql, pad=4, sep=",", end="\n);")
 
-
-def insert_table(
-    table: dict[  # Table Object
-        str,  # Name
-        list[  # Attribute List
-            dict[  # Attribute Object
-                str,  # Name
-                str,  # Type
-                str,  # Size
-                list[str]  # Modifiers
-            ]
-        ]
-    ]) -> str:
-    table_sql: str = insert_command(("CREATE TABLE", table["name"]), end=" (\n")
-
-    attributes_sql: str = ""
-    for attribute in table["attribute_list"]:
-        if "fk" not in attribute["modifiers"] and "pk" not in attribute["modifiers"]:
-            attr_name = attribute["name"]
-            attr_type = attribute["type"]
-            if attribute["size"] != "":
-                attr_type += f"({attribute['size']})"
-
-            attributes_sql += insert_command(
-                (attr_name, attr_type, " ".join(attribute["modifiers"])), 
-                tab=4,
-                end=",\n"
-            )
-
-    table_sql += insert_command((f"{attributes_sql})"))
+    print(table_sql)
 
     return table_sql
 
 
-def obj_to_str(
-        code_obj: dict[
-            str,  # Database Name
-            list[  # Table List
-                dict[  # Table Object
-                    str,  # Name
-                    list[  # Attribute List
-                        dict[  # Attribute Object
-                            str,  # Name
-                            str,  # Type
-                            str,  # Size
-                            list[str]  # Modifiers
-                        ]
-                    ]
-                ]
-            ]
-        ]
-    ) -> str:
+def obj_to_str(database_schema: DatabaseSchema) -> str:
     sql: str = ""
 
     # Defining the database
     sql += insert_command(
-        ("CREATE DATABASE", code_obj["database_name"]),
-        ("USE", code_obj["database_name"])
+        ("CREATE DATABASE", database_schema.database_name),
+        ("USE", database_schema.database_name)
     )
     sql += "\n"
 
     #Defining the tables
-    table_list = list()
-    for table in code_obj["table_list"]:
-        table_list.append(insert_command(insert_table(table)))
-    sql += "\n\n".join(table_list)
+    table_list: List[str] = list()
 
-    return sql + "\n"
+    for table in database_schema.table_list:
+        table_list.append(
+            insert_command(
+                insert_table(table), 
+                sep="",
+                end=""
+            )
+        )
+    
+    sql += "".join(table_list)
+
+    return sql[:-1] if sql[-1] == "\n" else sql
 
 
 def transpile(file_path: str) -> bool:
     if file_path.strip() == "":
         raise FileNotFoundError("The file path cannot be null.")
 
-    final_code: str = ""
+    sql_code: str = ""
 
-    json_code: list[
-        dict[
-            str, 
-            int, 
-            list[
-                dict[
-                    str, 
-                    str, 
-                    str, 
-                    list[str]
-                ]
-            ]
-        ]
-    ] = list()
+    json_object_list: List[JSONSchema] = list()
 
-    code_obj: dict[
-        str,  # Database Name
-        list[  # Table List
-            dict[  # Table Object
-                str,  # Name
-                list[  # Attribute List
-                    dict[  # Attribute Object
-                        str,  # Name
-                        str,  # Type
-                        str,  # Size
-                        list[str]  # Modifiers
-                    ]
-                ]
-            ]
-        ]
-    ] = dict()
+    database_object: DatabaseSchema = DatabaseSchema.model_construct()
 
     # Getting the JSON
     json_file = open(file_path, "r", encoding="UTF-8")
-    json_code = json.load(json_file)
+    json_content = json.load(json_file)
+    for json_schema in json_content:
+        json_object_list.append(JSONSchema.model_validate(json_schema))
 
     # Initializing the code object
-    code_obj["database_name"] = file_path.split("/")[-1].split(".")[0]
-    code_obj["table_list"] = list()
+    database_object.database_name = file_path.split("/")[-1].split(".")[0]
+    database_object.table_list = list()
 
     # Getting the tables
-    for i_table in range(len(json_code)):
-        table: dict[
-            str,
-            list[
-                dict[
-                    str,
-                    str,
-                    str,
-                    list[str]
-                ]
-            ]
-        ] = dict()
-        table["name"] = json_code[i_table]["name"]
-        table["attribute_list"] = list()
+    for i_table in range(len(json_object_list)):
+        table: Table = Table.model_construct()
+        table.name = json_object_list[i_table].name
+        table.attribute_list = list()
 
         # Getting the attributes
-        for i_attr in range(json_code[i_table]["size"]):
-            table["attribute_list"].append(json_code[i_table]["body"][i_attr])
+        for i_attr in range(json_object_list[i_table].size):
+            table.attribute_list.append(json_object_list[i_table].body[i_attr])
         
-        code_obj["table_list"].append(table)
+        database_object.table_list.append(table)
     
     # Converting the code object into a string
-    final_code = obj_to_str(code_obj)
+    sql_code = obj_to_str(database_object)
 
     # Saving the SQL
     dot_pos = file_path.rindex(".")
     final_code_path = file_path[0:dot_pos] + ".sql"
 
     final_code_file = open(final_code_path, "w", encoding="UTF-8")
-    final_code_file.write(final_code)
+    final_code_file.write(sql_code)
 
     return True

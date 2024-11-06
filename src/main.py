@@ -4,7 +4,19 @@ import json_parser
 
 if __name__ == "__main__":
     def run():
-        file_path = "../build/code.txt"
+        """
+        TODO:
+        - Add type hint to pseudocode_parser.py
+        - Improve pseudocode_parser.py in general
+        - Improve the PK/FK system (in both systems), specially the FK one, 
+        to get the referenced table and all that stuff. It will demand a rework
+        on the JSON's/Object's structure, like adding a new value to the table
+        object saying what table it references, if it has none than it is not an FK.
+        - Change the order of the tables to match the dependecy. If the SQL try to
+        add a FK to a table that has not been created, it will throw an error.
+        """
+
+        file_path = "build/code.txt"
         output_path: str
 
         # Pseudocode parsing step
