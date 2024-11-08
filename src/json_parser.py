@@ -1,6 +1,5 @@
-import json
 from typing import List, Any, Iterable
-from models import Table, DatabaseSchema, JSONSchema
+from models import Table, DatabaseSchema
 
 
 def insert_command(
@@ -112,31 +111,11 @@ def transpile(file_path: str) -> bool:
 
     sql_code: str = ""
 
-    json_object_list: List[JSONSchema] = list()
-
     database_object: DatabaseSchema = DatabaseSchema.model_construct()
 
     # Getting the JSON
     json_file = open(file_path, "r", encoding="UTF-8")
-    json_content = json.load(json_file)
-    for json_schema in json_content:
-        json_object_list.append(JSONSchema.model_validate(json_schema))
-
-    # Initializing the code object
-    database_object.database_name = file_path.split("/")[-1].split(".")[0]
-    database_object.table_list = list()
-
-    # Getting the tables
-    for i_table in range(len(json_object_list)):
-        table: Table = Table.model_construct()
-        table.name = json_object_list[i_table].name
-        table.attribute_list = list()
-
-        # Getting the attributes
-        for i_attr in range(json_object_list[i_table].size):
-            table.attribute_list.append(json_object_list[i_table].body[i_attr])
-        
-        database_object.table_list.append(table)
+    database_object = DatabaseSchema.model_validate_json(json_file.read())
     
     # Converting the code object into a string
     sql_code = obj_to_str(database_object)

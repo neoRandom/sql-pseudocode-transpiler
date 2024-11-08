@@ -1,5 +1,4 @@
-import json
-from models import Attribute, JSONSchema
+from models import Attribute, Table, DatabaseSchema
 
 
 def transpile(file_path: str) -> str:
@@ -10,7 +9,10 @@ def transpile(file_path: str) -> str:
     """
     pseudocode_lines: list[str] = list()
     tables_metadata: list[list[int]] = list()
-    table_list: list[JSONSchema] = list()
+    database: DatabaseSchema = DatabaseSchema.model_construct()
+
+    database.database_name = file_path.split("/")[-1].split(".")[0]
+    database.table_list = list()
 
     # Reading the pseudocode file
     pseudocode_file = open(file_path, "r", encoding="UTF-8")
@@ -28,12 +30,11 @@ def transpile(file_path: str) -> str:
 
     # Getting each table
     for index, size in tables_metadata:
-        table: JSONSchema = JSONSchema.model_construct()
+        table: Table = Table.model_construct()
 
         # Setting basic informations
         table.name = pseudocode_lines[index][0:-1].lower()
-        table.size = size
-        table.body = list()
+        table.attribute_list = list()
 
         # Getting the attributes
         for i in range(index, index + size):
@@ -52,7 +53,7 @@ def transpile(file_path: str) -> str:
             if attr_type == "pk" or attr_type.startswith("fk"):
                 # Setting the values on the object
                 attribute.name = attr_name
-                attribute.type = "unsigned int"  # The default value (for me) of a PK or FK is `unsigned int`
+                attribute.type = "int"  # The default value (for me) of a PK or FK is this
                 attribute.size = ""
                 attribute.modifiers = [m.lower() for m in modifiers] or []
                 attribute.modifiers.append(attr_type)
@@ -73,21 +74,16 @@ def transpile(file_path: str) -> str:
                 attribute.size = attr_size.replace(",", ", ")
                 attribute.modifiers = [m.lower() for m in modifiers] or []
             
-            table.body.append(attribute)
+            table.attribute_list.append(attribute)
         
         #
-        table_list.append(table)
+        database.table_list.append(table)
     
     # Saving the JSON
     dot_pos = file_path.rindex(".")
     output_path = file_path[0:dot_pos] + ".json"
 
     output_file = open(output_path, "w", encoding="UTF-8")
-    output_file.write(
-        json.dumps(
-            [table.model_dump() for table in table_list], 
-            indent=4
-        )
-    )
+    output_file.write(database.model_dump_json(indent=4))
 
     return output_path

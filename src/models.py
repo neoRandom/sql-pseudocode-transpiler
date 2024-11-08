@@ -14,8 +14,3 @@ class Table(BaseModel):
 class DatabaseSchema(BaseModel):
     database_name: str
     table_list: List[Table]
-
-class JSONSchema(BaseModel):
-    name: str
-    size: int
-    body: List[Attribute]
