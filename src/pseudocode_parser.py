@@ -73,6 +73,10 @@ class PseudocodeParser:
             table.attribute_list = list()
 
             for i in range(index + 1, index + size + 1):
+                # If it doesnt starts with this, it isnt an attribute
+                if not pseudocode_lines[i].startswith("  - "):  
+                    continue
+                    
                 line_split: list[str] 
                 attribute: Attribute = Attribute.model_construct()
 
@@ -82,15 +86,24 @@ class PseudocodeParser:
                     line_split = line_split[0].split("//")
                 
                 attr_line = line_split[0].strip().lower()
+                attr_line_split = [token.strip() for token in attr_line.replace(", ", ",").split(" ")]
+                
+                if len(attr_line_split) < 2:  # If it has less than 2 tokens, ignore, it have just the name
+                    continue
 
-                # TODO: Improve the line splitting system, its too bad and leads to errors.
-                # Some explanations on how this currently works:
-                # - ´replace(", ", ",")´ is to ignore the space-separed commas in the type size
-                attr_name, attr_type, *modifiers = attr_line.replace(", ", ",").split(" ")
+                attribute.name = attr_line_split[0].replace(":", "")
 
-                attr_type = attr_type.replace("-", " ")  
+                if attr_line_split[1] == "unsigned" and len(attr_line_split) > 2:
+                    attr_type = attr_line_split[2]
+                    attr_line_split = [attr_line_split[0], *attr_line_split[2:]]
+                else:
+                    attr_type = attr_line_split[1]
+                
+                if len(attr_line_split) > 2:
+                    modifiers = attr_line_split[2:]
+                else:
+                    modifiers = []
 
-                attribute.name = attr_name.replace(":", "")
                 attribute.description = line_split[1].strip() if len(line_split) > 1 else ""
 
                 if attr_type == "pk" or attr_type.startswith("fk"):
