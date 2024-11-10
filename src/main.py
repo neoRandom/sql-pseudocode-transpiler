@@ -23,6 +23,18 @@ if __name__ == "__main__":
 
         args_parser = ArgumentParser()
 
+        # Showing the help
+        if args_parser.option_exists("help"):
+            print("""*** SQL Pseudocode Transpiler ***
+Description: Transpile a custom SQL pseudocode into JSON, then into multiple things
+                  
+Options:
+    --file-path <path>: Defines the path to the pseudocode file
+    --verbose: Turns on the verbose mode (show progress and generate an indented JSON)
+    --update: Allows the transpiler to update existent files
+""")
+            return
+
         # Getting the arguments and options
         file_path = args_parser.get_argument(1, option_key="filepath", error_message="Missing required argument: 'filepath'")
         verbose_output = args_parser.option_exists("verbose")
