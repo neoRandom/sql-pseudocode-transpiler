@@ -1,7 +1,7 @@
 from models import Attribute, Table, DatabaseSchema
 
 
-def transpile(file_path: str) -> str:
+def transpile(file_path: str, *, verbose_output: bool) -> str:
     """
     Throws:
     - FileNotFoundError
@@ -117,6 +117,10 @@ def transpile(file_path: str) -> str:
         raise OSError(e)  # This also isn't a dumb code style
     else:
         with output_file:
-            output_file.write(database.model_dump_json(indent=4))
+            output_file.write(
+                database.model_dump_json(
+                    indent=4 if verbose_output else None
+                )
+            )
 
     return output_path

@@ -28,7 +28,7 @@ if __name__ == "__main__":
         # Pseudocode parsing step
         try:
             print("Parsing the pseudocode as JSON...")
-            output_path = pseudocode_parser.transpile(file_path)
+            output_path = pseudocode_parser.transpile(file_path, verbose_output=(args_parser.get_option("verbose") is not None))
         except FileNotFoundError as e:
             print(f"Error: Pseudocode file ´{e.filename}´ not found.\n{e}")
             return

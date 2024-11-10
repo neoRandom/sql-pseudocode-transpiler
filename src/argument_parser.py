@@ -2,18 +2,22 @@ from sys import argv
 
 class ArgumentParser:
     def __init__(self):
-        self.args: list[str] = argv
+        self.args: list[str] = argv.copy()
         self.options: dict[str, str] = dict()
 
         # Getting the options
         for i, arg in enumerate(argv):
-            if arg.startswith("-") and len(argv) > i + 1:
-                value = argv[i + 1]
-                if not value.startswith("-"):
-                    self.options[arg.replace("-", "")] = value
-                    self.args.remove(arg)
-                    self.args.remove(value)
-
+            if arg.startswith("-"):
+                if len(argv) > i + 1:
+                    value = argv[i + 1]
+                    if not value.startswith("-"):
+                        self.options[arg.replace("-", "")] = value
+                        self.args.remove(arg)
+                        self.args.remove(value)
+                        continue
+                
+                self.options[arg.replace("-", "")] = "null"
+                self.args.remove(arg)
 
     def get_argument(
             self, 
@@ -36,7 +40,7 @@ class ArgumentParser:
             self, 
             option_key: str, 
             *, 
-            panic: bool = True, 
+            panic: bool = False, 
             panic_message: str = "Missing required option"):
         if option_key in self.options.keys():
             return self.options[option_key].strip()
