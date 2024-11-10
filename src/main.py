@@ -1,5 +1,6 @@
 from pseudocode_parser import PseudocodeParser
 import json_to_sql
+import json_to_excel
 from argument_parser import ArgumentParser
 
 
@@ -18,7 +19,7 @@ if __name__ == "__main__":
         """
 
         file_path: str
-        output_path: str
+        json_path: str
 
         args_parser = ArgumentParser()
 
@@ -28,13 +29,13 @@ if __name__ == "__main__":
         update_files = args_parser.option_exists("update")
 
         # Getting the output path
-        output_path = file_path[:file_path.rindex(".")] + ".json"
+        json_path = file_path[:file_path.rindex(".")] + ".json"
 
         # Pseudocode parsing step
         pseudocode_parser = PseudocodeParser(update_files=True)
 
         try:
-            pseudocode_parser.transpile(file_path, output_path)
+            pseudocode_parser.transpile(file_path, json_path)
         except FileNotFoundError as e:
             print(f"Error: Pseudocode file ´{e.filename}´ not found.\n{e}")
             return
@@ -47,7 +48,7 @@ if __name__ == "__main__":
         # JSON parsing step
         try:
             print("Parsing the JSON as SQL...")
-            json_to_sql.transpile(output_path)
+            json_to_sql.transpile(json_path)
         except FileNotFoundError as e:
             print(f"Error: JSON file ´{e.filename}´ not found.\n{e}")
             return
@@ -55,6 +56,19 @@ if __name__ == "__main__":
             print(f"Error: Generic error.\n{e}")
             return
         else:
-            print("JSON parsed successfully.")
+            print("JSON generated successfully.")
+
+        # Excel step
+        try:
+            print("Generating the Data Dictionary (Excel)...")
+            json_to_excel.parse_json_to_excel(json_path)
+        except FileNotFoundError as e:
+            print(f"Error: JSON file ´{e.filename}´ not found.\n{e}")
+            return
+        except Exception as e:
+            print(f"Error: Generic error.\n{e}")
+            return
+        else:
+            print("Data Dictionary (Excel) generated successfully.")
     
     run()

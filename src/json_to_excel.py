@@ -103,5 +103,3 @@ def parse_json_to_excel(json_path: str):
 
     tables = parse_json_to_obj(json_path)
     generate_excel(tables, output_file)
-
-parse_json_to_excel('build/pet.json')
