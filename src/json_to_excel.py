@@ -12,11 +12,9 @@ def parse_json_to_obj(json_path: str) -> list[list[str]]:
     obj_rows: list[list[str]] = []
 
     for table in database.table_list:
-        table_name = table.name
-
-        obj_rows.append(["Tabela", table_name])
-        obj_rows.append(["Descrição"])
-        obj_rows.append(["Observações"])
+        obj_rows.append(["Tabela", table.name])
+        obj_rows.append(["Descrição", table.description])
+        obj_rows.append(["Observações", table.notes])
         obj_rows.append(["Campos"])
         obj_rows.append(["Nome", "Descrição", "Tipo de dado", "Tamanho", "Restrições"])
 
@@ -53,31 +51,48 @@ def generate_excel(tables: list[list[str]], output_file: str) -> None:
     wb = opx.load_workbook(output_file)
     ws = wb["main"]
 
-    for row_index in range(2, ws.max_row):
-        pattern_fill: opxs.PatternFill
-        cells_to_fill: int = 1
+    row_index = 2
+    while row_index < ws.max_row:
+        if ws[row_index][0].value != "Tabela":
+            row_index += 1
+            continue
 
-        match ws[row_index][0].value:
-            case "Tabela" | "Descrição" | "Observações":
-                ws.merge_cells(start_row=row_index, start_column=2, end_row=row_index, end_column=5)
-                pattern_fill = opxs.PatternFill(start_color="bdd7ee", end_color="bdd7ee", fill_type="solid")
-                ws[row_index][1].alignment = opxs.Alignment(horizontal="left", vertical="center", indent=1)
-            case "Campos":
-                ws.merge_cells(start_row=row_index, start_column=1, end_row=row_index, end_column=5)
-                pattern_fill = opxs.PatternFill(start_color="c6e0b4", end_color="c6e0b4", fill_type="solid")
-            case "Nome":
-                pattern_fill = opxs.PatternFill(start_color="bdd7ee", end_color="bdd7ee", fill_type="solid")
-                cells_to_fill = 5
-            case _: continue
+        campos_row = row_index + 3
+        attributes_row = row_index + 4
+
+        font = opxs.Font(b=True)
+        alignment = opxs.Alignment(horizontal="center", vertical="center")
+        blue_fill = opxs.PatternFill(start_color="bdd7ee", end_color="bdd7ee", fill_type="solid")
+        green_fill = opxs.PatternFill(start_color="c6e0b4", end_color="c6e0b4", fill_type="solid")
+
+        # Setting the upper row (if it has one)
+        if row_index > 5:
+            upper_row = row_index - 1
+            ws.merge_cells(start_row=upper_row, start_column=1, end_row=upper_row, end_column=5)
         
-        if ws[row_index][0].value in ("Tabela", "Descrição", "Observações", "Campos", "Nome"):
-            font = opxs.Font(b=True)
-            alignment = opxs.Alignment(horizontal="center", vertical="center")
-            ws.row_dimensions[row_index].height = 20
-            for cell_index in range(cells_to_fill):
-                ws[row_index][cell_index].font = font
-                ws[row_index][cell_index].fill = pattern_fill
-                ws[row_index][cell_index].alignment = alignment
+        # Setting the first 3 rows
+        for i in range(row_index, row_index + 3):
+            ws.row_dimensions[i].height = 20
+            ws.merge_cells(start_row=i, start_column=2, end_row=i, end_column=5)
+            ws[i][0].font = font
+            ws[i][0].fill = blue_fill
+            ws[i][0].alignment = alignment
+            ws[i][1].alignment = opxs.Alignment(horizontal="left", vertical="center", indent=1)
+        
+        # Setting the 4th row
+        ws.merge_cells(start_row=campos_row, start_column=1, end_row=campos_row, end_column=5)
+        ws[campos_row][0].font = font
+        ws[campos_row][0].fill = green_fill
+        ws[campos_row][0].alignment = alignment
+
+        # Setting the 5th row
+        ws.row_dimensions[attributes_row].height = 20
+        for j in range(5):
+            ws[attributes_row][j].font = font
+            ws[attributes_row][j].fill = blue_fill
+            ws[attributes_row][j].alignment = alignment
+        
+        row_index += 6
     
     # Salvar as alterações
     wb.save(output_file)
