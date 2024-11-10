@@ -1,7 +1,8 @@
+from multiprocessing import Process
+from argument_parser import ArgumentParser
 from pseudocode_parser import PseudocodeParser
 import json_to_sql
 import json_to_excel
-from argument_parser import ArgumentParser
 
 
 HELP_MESSAGE = """
@@ -48,43 +49,56 @@ if __name__ == "__main__":
         json_path = file_path[:file_path.rindex(".")] + ".json"
 
         # Pseudocode parsing step
-        pseudocode_parser = PseudocodeParser(update_files=update_files, verbose_output=verbose_output)
-
-        try:
-            pseudocode_parser.transpile(file_path, json_path)
-        except FileNotFoundError as e:
-            print(f"Error: Pseudocode file ´{e.filename}´ not found.\n{e}")
-            return
-        except Exception as e:
-            print(f"Error: Generic error.\n{e}")
-            return
-
-        del pseudocode_parser
+        def generate_json() -> bool:
+            pseudocode_parser = PseudocodeParser(update_files=update_files, verbose_output=verbose_output)
+        
+            try:
+                pseudocode_parser.transpile(file_path, json_path)
+            except FileNotFoundError as e:
+                print(f"Error: Pseudocode file ´{e.filename}´ not found.\n{e}")
+            except Exception as e:
+                print(f"Error: Generic error.\n{e}")
+            else:
+                return True
+            return False
         
         # JSON parsing step
-        try:
-            print("Parsing the JSON as SQL...")
-            json_to_sql.transpile(json_path)
-        except FileNotFoundError as e:
-            print(f"Error: JSON file ´{e.filename}´ not found.\n{e}")
-            return
-        except Exception as e:
-            print(f"Error: Generic error.\n{e}")
-            return
-        else:
-            print("JSON generated successfully.")
+        def generate_sql():
+            try:
+                print("Parsing the JSON as SQL...")
+                json_to_sql.transpile(json_path)
+            except FileNotFoundError as e:
+                print(f"Error: JSON file ´{e.filename}´ not found.\n{e}")
+            except Exception as e:
+                print(f"Error: Generic error.\n{e}")
+            else:
+                print("JSON generated successfully.")
 
         # Excel step
-        try:
-            print("Generating the Data Dictionary (Excel)...")
-            json_to_excel.parse_json_to_excel(json_path)
-        except FileNotFoundError as e:
-            print(f"Error: JSON file ´{e.filename}´ not found.\n{e}")
-            return
-        except Exception as e:
-            print(f"Error: Generic error.\n{e}")
-            return
-        else:
-            print("Data Dictionary (Excel) generated successfully.")
-    
+        def generate_excel_dd():
+            try:
+                print("Generating the Data Dictionary (Excel)...")
+                json_to_excel.parse_json_to_excel(json_path)
+            except FileNotFoundError as e:
+                print(f"Error: JSON file ´{e.filename}´ not found.\n{e}")
+            except Exception as e:
+                print(f"Error: Generic error.\n{e}")
+            else:
+                print("Data Dictionary (Excel) generated successfully.")
+
+        if not generate_json():
+            raise RuntimeError("Error generating the JSON file.")
+        
+        thread_pool: list[Process] = list()
+        functions_to_execute = [generate_sql, generate_excel_dd]
+
+        for func in functions_to_execute:
+            thread_pool.append(Process(target=func, args=()))
+        
+        for thread in thread_pool:
+            thread.start()
+        
+        for thread in thread_pool:
+            thread.join()
+
     run()
