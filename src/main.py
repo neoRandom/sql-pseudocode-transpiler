@@ -1,4 +1,4 @@
-import pseudocode_parser
+from pseudocode_parser import PseudocodeParser
 import json_to_sql
 from argument_parser import ArgumentParser
 
@@ -22,21 +22,27 @@ if __name__ == "__main__":
 
         args_parser = ArgumentParser()
 
-        # Getting the file path
+        # Getting the arguments and options
         file_path = args_parser.get_argument(1, option_key="filepath", error_message="Missing required argument: 'filepath'")
+        verbose_output = args_parser.option_exists("verbose")
+        update_files = args_parser.option_exists("update")
+
+        # Getting the output path
+        output_path = file_path[:file_path.rindex(".")] + ".json"
 
         # Pseudocode parsing step
+        pseudocode_parser = PseudocodeParser(update_files=True)
+
         try:
-            print("Parsing the pseudocode as JSON...")
-            output_path = pseudocode_parser.transpile(file_path, verbose_output=(args_parser.get_option("verbose") is not None))
+            pseudocode_parser.transpile(file_path, output_path)
         except FileNotFoundError as e:
             print(f"Error: Pseudocode file ´{e.filename}´ not found.\n{e}")
             return
         except Exception as e:
             print(f"Error: Generic error.\n{e}")
             return
-        else:
-            print("Pseudocode parsed successfully.")
+
+        del pseudocode_parser
         
         # JSON parsing step
         try:

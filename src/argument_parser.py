@@ -46,3 +46,6 @@ class ArgumentParser:
             return self.options[option_key].strip()
         if panic is True:
             raise ValueError(panic_message)
+        
+    def option_exists(self, option_key: str):
+        return self.get_option(option_key) is not None
