@@ -1,6 +1,6 @@
 import pseudocode_parser
 import json_to_sql
-from sys import argv
+from argument_parser import ArgumentParser
 
 
 if __name__ == "__main__":
@@ -20,10 +20,10 @@ if __name__ == "__main__":
         file_path: str
         output_path: str
 
+        args_parser = ArgumentParser()
+
         # Getting the file path
-        if len(argv) < 2:
-            raise ValueError("Missing required argument: 'file path'")
-        file_path = argv[1]
+        file_path = args_parser.get_argument(1, option_key="filepath", error_message="Missing required argument: 'filepath'")
 
         # Pseudocode parsing step
         try:
