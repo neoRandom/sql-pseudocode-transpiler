@@ -63,7 +63,7 @@ class PseudocodeParser:
             table.notes = header_split[1].strip() if len(header_split) > 1 else "Não se aplica"
 
             # Getting the description
-            if pseudocode_lines[index + 1][2:].lower()[:10] in ("descricao:", "descrição:"):
+            if pseudocode_lines[index + 1][2:].lower().startswith("description"):
                 table.description = pseudocode_lines[index + 1][2:].split(":")[1].strip()
                 index += 1
             else:
