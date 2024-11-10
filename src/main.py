@@ -3,6 +3,7 @@ import json_to_sql
 import json_to_excel
 from argument_parser import ArgumentParser
 
+
 HELP_MESSAGE = """
 *** SQL Pseudocode Transpiler ***
 Description: Transpile a custom SQL pseudocode into JSON, then into multiple things
@@ -12,6 +13,7 @@ Options:
   --verbose: Turns on the verbose mode (show progress and generate an indented JSON)
   --update: Allows the transpiler to update existent files
 """
+
 
 if __name__ == "__main__":
     def run():
@@ -39,14 +41,14 @@ if __name__ == "__main__":
 
         # Getting the arguments and options
         file_path = args_parser.get_argument(1, option_key="filepath", error_message="Missing required argument: 'filepath'")
-        verbose_output = args_parser.option_exists("verbose")
         update_files = args_parser.option_exists("update")
+        verbose_output = args_parser.option_exists("verbose")
 
         # Getting the output path
         json_path = file_path[:file_path.rindex(".")] + ".json"
 
         # Pseudocode parsing step
-        pseudocode_parser = PseudocodeParser(update_files=True)
+        pseudocode_parser = PseudocodeParser(update_files=update_files, verbose_output=verbose_output)
 
         try:
             pseudocode_parser.transpile(file_path, json_path)
