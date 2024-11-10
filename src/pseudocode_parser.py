@@ -30,40 +30,62 @@ def transpile(file_path: str) -> str:
 
     # Getting the code metadata (tables index position and size)
     for i, line in enumerate(pseudocode_lines):
-        if line.startswith("- "):
+        if line.startswith("  - "):
             tables_metadata[-1][1] += 1
-        else:
+        elif line.startswith("- "):
             tables_metadata.append([i, 0])
 
     # Getting each table
     for index, size in tables_metadata:
         table: Table = Table.model_construct()
+        header_split: list[str]
 
-        # Setting basic informations
-        table.name = pseudocode_lines[index][0:-1].lower()
+        # ===== Setting basic informations
+
+        # Getting the header (index)
+        header_split = pseudocode_lines[index][2:].split("#")
+        if len(header_split) < 2:
+            header_split = header_split[0].split("//")
+        
+        table.name = header_split[0].strip().lower()
+        table.notes = header_split[1].strip() if len(header_split) > 1 else "Não se aplica"
+
+        # Getting the description
+        if pseudocode_lines[index + 1][2:].lower()[:10] in ("descricao:", "descrição:"):
+            table.description = pseudocode_lines[index + 1][2:].split(":")[1].strip()
+            index += 1
+        else:
+            table.description = "Não se aplica"
+        
+        # Getting the attributes
         table.attribute_list = list()
 
-        # Getting the attributes
-        for i in range(index, index + size):
-            line = pseudocode_lines[i + 1][2:-1]
+        for i in range(index + 1, index + size + 1):
+            line_split: list[str] 
             attribute: Attribute = Attribute.model_construct()
+
+            # Parsing the line
+            line_split = pseudocode_lines[i][4:].split("#")
+            if len(line_split) < 2:
+                line_split = line_split[0].split("//")
+            
+            attr_line = line_split[0].strip().lower()
 
             # TODO: Improve the line splitting system, its too bad and leads to errors.
             # Some explanations on how this currently works:
-            # - ´replace("unsigned ", "unsigned-")´ is to ignore the type prefix when splitting
             # - ´replace(", ", ",")´ is to ignore the space-separed commas in the type size
-            attr_name, attr_type, *modifiers = line.replace("unsigned ", "unsigned-").replace(", ", ",").split(" ")
+            attr_name, attr_type, *modifiers = attr_line.replace(", ", ",").split(" ")
 
-            attr_name = attr_name.lower().replace(":", "")
-            attr_type = attr_type.lower().replace("-", " ")  
+            attr_type = attr_type.replace("-", " ")  
+
+            attribute.name = attr_name.replace(":", "")
+            attribute.description = line_split[1].strip() if len(line_split) > 1 else ""
 
             if attr_type == "pk" or attr_type.startswith("fk"):
                 # Setting the values on the object
-                attribute.name = attr_name
                 attribute.type = "int"  # The default value (for me) of a PK or FK is this
                 attribute.size = ""
-                attribute.modifiers = [m.lower() for m in modifiers] or []
-                attribute.modifiers.append(attr_type)
+                modifiers.append(attr_type)
             else:
                 # Getting the attribute size if it has one, the value will just be an empty string if not
                 if "(" in attr_type:
@@ -76,10 +98,10 @@ def transpile(file_path: str) -> str:
                     modifiers.append("not null")
 
                 # Setting the values on the object
-                attribute.name = attr_name
                 attribute.type = attr_type
                 attribute.size = attr_size.replace(",", ", ")
-                attribute.modifiers = [m.lower() for m in modifiers] or []
+            
+            attribute.modifiers = [m for m in modifiers] or []
             
             table.attribute_list.append(attribute)
         
