@@ -4,8 +4,8 @@ from models import Attribute, Table, DatabaseSchema
 def transpile(file_path: str) -> str:
     """
     Throws:
-    - OSError
     - FileNotFoundError
+    - OSError
     """
     pseudocode_lines: list[str] = list()
     tables_metadata: list[list[int]] = list()
@@ -15,11 +15,18 @@ def transpile(file_path: str) -> str:
     database.table_list = list()
 
     # Reading the pseudocode file
-    pseudocode_file = open(file_path, "r", encoding="UTF-8")
-    pseudocode_lines = [
-        line for line in pseudocode_file.readlines()
-        if line.strip() != ""
-    ]
+    try:
+        pseudocode_file = open(file_path, "r", encoding="UTF-8")
+    except FileNotFoundError as e:
+        # Trust me, this works, it isn't just a dumb code
+        # If the open failed, the file isn't open, so it does not require to be closed
+        raise FileNotFoundError(e)
+    else:
+        with pseudocode_file:    
+            pseudocode_lines = [
+                line for line in pseudocode_file.readlines()
+                if line.strip() != ""  # Ignores the "\n\n" type of writing, a.k.a. blank line
+            ]
 
     # Getting the code metadata (tables index position and size)
     for i, line in enumerate(pseudocode_lines):
@@ -82,8 +89,12 @@ def transpile(file_path: str) -> str:
     # Saving the JSON
     dot_pos = file_path.rindex(".")
     output_path = file_path[0:dot_pos] + ".json"
-
-    output_file = open(output_path, "w", encoding="UTF-8")
-    output_file.write(database.model_dump_json(indent=4))
+    try:
+        output_file = open(output_path, "w", encoding="UTF-8")
+    except OSError as e:
+        raise OSError(e)  # This also isn't a dumb code style
+    else:
+        with output_file:
+            output_file.write(database.model_dump_json(indent=4))
 
     return output_path

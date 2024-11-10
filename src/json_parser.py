@@ -114,8 +114,13 @@ def transpile(file_path: str) -> bool:
     database_object: DatabaseSchema = DatabaseSchema.model_construct()
 
     # Getting the JSON
-    json_file = open(file_path, "r", encoding="UTF-8")
-    database_object = DatabaseSchema.model_validate_json(json_file.read())
+    try:
+        json_file = open(file_path, "r", encoding="UTF-8")
+    except FileNotFoundError as e:
+        raise FileNotFoundError(e)
+    else:
+        with json_file:
+            database_object = DatabaseSchema.model_validate_json(json_file.read())
     
     # Converting the code object into a string
     sql_code = obj_to_str(database_object)
@@ -124,7 +129,12 @@ def transpile(file_path: str) -> bool:
     dot_pos = file_path.rindex(".")
     final_code_path = file_path[0:dot_pos] + ".sql"
 
-    final_code_file = open(final_code_path, "w", encoding="UTF-8")
-    final_code_file.write(sql_code)
+    try:
+        final_code_file = open(final_code_path, "w", encoding="UTF-8")
+    except OSError as e:
+        raise OSError(e)
+    else:
+        with final_code_file:
+            final_code_file.write(sql_code)
 
     return True

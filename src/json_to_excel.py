@@ -1,4 +1,5 @@
 from models import DatabaseSchema
+import os
 import pandas as pd
 import openpyxl as opx
 import openpyxl.styles as opxs
@@ -44,6 +45,8 @@ def generate_excel(tables: list[list[str]], output_file: str) -> None:
     df = pd.DataFrame(tables)
     
     # Creating the Excel file
+    if os.path.exists(output_file):
+        os.remove(output_file)
     df.to_excel(output_file, index=False, sheet_name="main") # type: ignore
     
     # Opening the Excel file to merge some cells
