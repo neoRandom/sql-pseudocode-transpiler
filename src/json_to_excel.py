@@ -17,7 +17,7 @@ def parse_json_to_obj(json_path: str) -> list[list[str]]:
         obj_rows.append(["Tabela", table_name])
         obj_rows.append(["Descrição"])
         obj_rows.append(["Observações"])
-        obj_rows.append([*(["Campos"] * 5)])
+        obj_rows.append(["Campos"])
         obj_rows.append(["Nome", "Descrição", "Tipo de dado", "Tamanho", "Restrições"])
 
         for attribute in table.attribute_list:
@@ -26,9 +26,9 @@ def parse_json_to_obj(json_path: str) -> list[list[str]]:
             attr_size = attribute.size
             modifiers = ", ".join(
                 [
-                    m.capitalize() if m != "pk" 
-                    else "PK" if not m.startswith("fk") 
-                    else "FK" 
+                    "FK" if m.startswith("fk")
+                    else "PK, Identity" if m == "pk"
+                    else m.capitalize()
                     for m in attribute.modifiers 
                 ]
             ) 
@@ -53,14 +53,32 @@ def generate_excel(tables: list[list[str]], output_file: str) -> None:
     wb = opx.load_workbook(output_file)
     ws = wb["main"]
 
-    for row in range(2, len(df) + 2):  # A primeira linha (cabeçalho) é a 1
-        if ws[row][0].value in ("Tabela", "Descrição", "Observações"):
-            ws.merge_cells(start_row=row, start_column=2, end_row=row, end_column=5)
-            ws[row][0].fill = opxs.PatternFill(start_color="bdd7ee", end_color="bdd7ee", fill_type="solid")
-        elif ws[row][0].value == "Campos":
-            ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=5)
-            ws[row][0].fill = opxs.PatternFill(start_color="c6e0b4", end_color="c6e0b4", fill_type="solid")
+    for row_index in range(2, ws.max_row):
+        pattern_fill: opxs.PatternFill
+        cells_to_fill: int = 1
 
+        match ws[row_index][0].value:
+            case "Tabela" | "Descrição" | "Observações":
+                ws.merge_cells(start_row=row_index, start_column=2, end_row=row_index, end_column=5)
+                pattern_fill = opxs.PatternFill(start_color="bdd7ee", end_color="bdd7ee", fill_type="solid")
+                ws[row_index][1].alignment = opxs.Alignment(horizontal="left", vertical="center", indent=1)
+            case "Campos":
+                ws.merge_cells(start_row=row_index, start_column=1, end_row=row_index, end_column=5)
+                pattern_fill = opxs.PatternFill(start_color="c6e0b4", end_color="c6e0b4", fill_type="solid")
+            case "Nome":
+                pattern_fill = opxs.PatternFill(start_color="bdd7ee", end_color="bdd7ee", fill_type="solid")
+                cells_to_fill = 5
+            case _: continue
+        
+        if ws[row_index][0].value in ("Tabela", "Descrição", "Observações", "Campos", "Nome"):
+            font = opxs.Font(b=True)
+            alignment = opxs.Alignment(horizontal="center", vertical="center")
+            ws.row_dimensions[row_index].height = 20
+            for cell_index in range(cells_to_fill):
+                ws[row_index][cell_index].font = font
+                ws[row_index][cell_index].fill = pattern_fill
+                ws[row_index][cell_index].alignment = alignment
+    
     # Salvar as alterações
     wb.save(output_file)
 
