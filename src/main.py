@@ -1,5 +1,5 @@
 import pseudocode_parser
-import json_parser
+import json_to_sql
 from sys import argv
 
 
@@ -41,7 +41,7 @@ if __name__ == "__main__":
         # JSON parsing step
         try:
             print("Parsing the JSON as SQL...")
-            json_parser.transpile(output_path)
+            json_to_sql.transpile(output_path)
         except FileNotFoundError as e:
             print(f"Error: JSON file ´{e.filename}´ not found.\n{e}")
             return
