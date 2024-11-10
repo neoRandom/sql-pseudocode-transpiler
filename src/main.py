@@ -3,6 +3,15 @@ import json_to_sql
 import json_to_excel
 from argument_parser import ArgumentParser
 
+HELP_MESSAGE = """
+*** SQL Pseudocode Transpiler ***
+Description: Transpile a custom SQL pseudocode into JSON, then into multiple things
+                  
+Options:
+  --file-path <path>: Defines the path to the pseudocode file
+  --verbose: Turns on the verbose mode (show progress and generate an indented JSON)
+  --update: Allows the transpiler to update existent files
+"""
 
 if __name__ == "__main__":
     def run():
@@ -25,14 +34,7 @@ if __name__ == "__main__":
 
         # Showing the help
         if args_parser.option_exists("help"):
-            print("""*** SQL Pseudocode Transpiler ***
-Description: Transpile a custom SQL pseudocode into JSON, then into multiple things
-                  
-Options:
-    --file-path <path>: Defines the path to the pseudocode file
-    --verbose: Turns on the verbose mode (show progress and generate an indented JSON)
-    --update: Allows the transpiler to update existent files
-""")
+            print(HELP_MESSAGE)
             return
 
         # Getting the arguments and options
