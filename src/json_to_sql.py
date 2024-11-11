@@ -1,6 +1,6 @@
 from typing import List, Any, Iterable
 from models import Table, DatabaseSchema
-
+from os.path import exists
 
 def insert_command(
         *sql: Iterable[Any], 
@@ -105,9 +105,18 @@ def obj_to_str(database_schema: DatabaseSchema) -> str:
     return sql[:-1] if sql[-1] == "\n" else sql
 
 
-def transpile(file_path: str) -> bool:
+def transpile(file_path: str, *, update_files: bool, verbose_output: bool) -> bool:
     if file_path.strip() == "":
         raise FileNotFoundError("The file path cannot be null.")
+    
+    dot_pos = file_path.rindex(".")
+    final_code_path = file_path[0:dot_pos] + ".sql"
+
+    if exists(final_code_path) and not update_files and verbose_output:
+        return False
+    
+    if verbose_output:
+        print("Parsing the JSON as SQL...")
 
     sql_code: str = ""
 
@@ -126,9 +135,6 @@ def transpile(file_path: str) -> bool:
     sql_code = obj_to_str(database_object)
 
     # Saving the SQL
-    dot_pos = file_path.rindex(".")
-    final_code_path = file_path[0:dot_pos] + ".sql"
-
     try:
         final_code_file = open(final_code_path, "w", encoding="UTF-8")
     except OSError as e:
@@ -136,5 +142,8 @@ def transpile(file_path: str) -> bool:
     else:
         with final_code_file:
             final_code_file.write(sql_code)
+
+    if verbose_output:
+        print("SQL generated successfully.")
 
     return True

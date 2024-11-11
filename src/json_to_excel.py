@@ -38,18 +38,19 @@ def parse_json_to_obj(json_path: str) -> list[list[str]]:
     return obj_rows
 
 
-def generate_excel(tables: list[list[str]], output_file: str) -> None:
+def generate_excel(tables: list[list[str]], output_file: str) -> bool:
     # Creating the DataFrame
     df = pd.DataFrame(tables)
     
     # Creating the Excel file
-    if os.path.exists(output_file):
-        os.remove(output_file)
     df.to_excel(output_file, index=False, sheet_name="main") # type: ignore
     
-    # Opening the Excel file to merge some cells
+    # Opening the Excel file to do some alterations
     wb = opx.load_workbook(output_file)
     ws = wb["main"]
+
+    for j in range(5):
+        ws[1][j].value = ""
 
     row_index = 2
     while row_index < ws.max_row:
@@ -97,9 +98,26 @@ def generate_excel(tables: list[list[str]], output_file: str) -> None:
     # Salvar as alterações
     wb.save(output_file)
 
+    return True
 
-def parse_json_to_excel(json_path: str):
+
+def transpile(json_path: str, *, update_files: bool, verbose_output: bool):
     output_file = json_path[:json_path.rfind(".")] + ".xlsx"
 
+    if os.path.exists(output_file):
+        if update_files:
+            os.remove(output_file)
+        else:
+            return False
+    
+    if verbose_output:
+        print("Generating the Data Dictionary (Excel)...")
+
     tables = parse_json_to_obj(json_path)
-    generate_excel(tables, output_file)
+    if generate_excel(tables, output_file):
+        if verbose_output:
+            print("Data Dictionary (Excel) generated successfully.")
+    else:
+        if verbose_output:
+            print("Data Dictionary not created/updated.")
+

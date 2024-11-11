@@ -65,30 +65,25 @@ if __name__ == "__main__":
         # JSON parsing step
         def generate_sql():
             try:
-                print("Parsing the JSON as SQL...")
-                json_to_sql.transpile(json_path)
+                json_to_sql.transpile(json_path, update_files=update_files, verbose_output=verbose_output)
             except FileNotFoundError as e:
                 print(f"Error: JSON file ´{e.filename}´ not found.\n{e}")
             except Exception as e:
                 print(f"Error: Generic error.\n{e}")
-            else:
-                print("JSON generated successfully.")
 
         # Excel step
         def generate_excel_dd():
             try:
-                print("Generating the Data Dictionary (Excel)...")
-                json_to_excel.parse_json_to_excel(json_path)
+                json_to_excel.transpile(json_path, update_files=update_files, verbose_output=verbose_output)
             except FileNotFoundError as e:
                 print(f"Error: JSON file ´{e.filename}´ not found.\n{e}")
             except Exception as e:
                 print(f"Error: Generic error.\n{e}")
-            else:
-                print("Data Dictionary (Excel) generated successfully.")
 
         if not generate_json():
             raise RuntimeError("Error generating the JSON file.")
         
+        # Executing the processes
         thread_pool: list[Process] = list()
         functions_to_execute = [generate_sql, generate_excel_dd]
 
