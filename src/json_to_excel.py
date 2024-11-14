@@ -20,6 +20,7 @@ def parse_json_to_obj(json_path: str) -> list[list[str]]:
 
         for attribute in table.attribute_list:
             attr_name = attribute.name
+            attr_desc = attribute.description
             attr_type = attribute.type
             attr_size = attribute.size
             modifiers = ", ".join(
@@ -32,7 +33,7 @@ def parse_json_to_obj(json_path: str) -> list[list[str]]:
             ) 
             
             # Adiciona os dados da tabela em uma lista
-            obj_rows.append([attr_name, "", attr_type, attr_size, modifiers])
+            obj_rows.append([attr_name, attr_desc, attr_type, attr_size, modifiers])
         obj_rows.append([""])
 
     return obj_rows
@@ -49,9 +50,26 @@ def generate_excel(tables: list[list[str]], output_file: str) -> bool:
     wb = opx.load_workbook(output_file)
     ws = wb["main"]
 
+    # Defining the default font and the default border
+    default_font = opxs.Font(name="Calibri (Body)", sz=12)
+    default_border = opxs.Border(
+        left=opxs.Side(style="thin"),
+        right=opxs.Side(style="thin"),
+        top=opxs.Side(style="thin"),
+        bottom=opxs.Side(style="thin")
+    )
+    for row in range(2, ws.max_row):
+        for cell in ws[row]:
+            cell.font = default_font
+            cell.border = default_border
+
+
+    # Removing the index at row 1
     for j in range(5):
         ws[1][j].value = ""
+        ws[1][j].border = opxs.Border()
 
+    # Updating the other styles
     row_index = 2
     while row_index < ws.max_row:
         if ws[row_index][0].value != "Tabela":
@@ -61,7 +79,7 @@ def generate_excel(tables: list[list[str]], output_file: str) -> bool:
         campos_row = row_index + 3
         attributes_row = row_index + 4
 
-        font = opxs.Font(b=True)
+        font = opxs.Font(name="Calibri (Body)", sz=12, b=True)
         alignment = opxs.Alignment(horizontal="center", vertical="center")
         blue_fill = opxs.PatternFill(start_color="bdd7ee", end_color="bdd7ee", fill_type="solid")
         green_fill = opxs.PatternFill(start_color="c6e0b4", end_color="c6e0b4", fill_type="solid")
@@ -70,6 +88,9 @@ def generate_excel(tables: list[list[str]], output_file: str) -> bool:
         if row_index > 5:
             upper_row = row_index - 1
             ws.merge_cells(start_row=upper_row, start_column=1, end_row=upper_row, end_column=5)
+            ws.row_dimensions[upper_row].height = 25
+            for cell in range(5):
+                ws[upper_row][cell].border = opxs.Border()
         
         # Setting the first 3 rows
         for i in range(row_index, row_index + 3):
@@ -82,6 +103,7 @@ def generate_excel(tables: list[list[str]], output_file: str) -> bool:
         
         # Setting the 4th row
         ws.merge_cells(start_row=campos_row, start_column=1, end_row=campos_row, end_column=5)
+        ws.row_dimensions[campos_row].height = 18
         ws[campos_row][0].font = font
         ws[campos_row][0].fill = green_fill
         ws[campos_row][0].alignment = alignment
@@ -95,7 +117,19 @@ def generate_excel(tables: list[list[str]], output_file: str) -> bool:
         
         row_index += 6
     
-    # Salvar as alterações
+    # Calculate and set optimal column widths
+    for col in ws.columns:
+        max_length = 0
+        column = col[0].column_letter
+        for cell in col:
+            if cell.value:
+                # Update max_length if the cell value length is greater
+                max_length = max(max_length, len(str(cell.value)))
+        # Adjust column width (approximate width in Excel is max_length * 1.2)
+        adjusted_width = (max_length + 2) * 1.2  # Add padding and adjust for font
+        ws.column_dimensions[column].width = adjusted_width
+    
+    # Saving alterations
     wb.save(output_file)
 
     return True
